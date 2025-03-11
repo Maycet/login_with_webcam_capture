@@ -1,7 +1,37 @@
 # login_with_webcam_capture
 Academic prototype for a login app with camera authentication.
 
+## Description
+This project is an academic prototype for a login application that uses camera authentication. It captures images from the webcam and uses OpenCV for facial recognition.
 
-The hackathon.pyw file is the main script to execute the aplication. I know that there is an error compiling the OpenCV classes for the camera visualization on the show_frame method, and I hope to solve this as soon as possible (any collaboration is welcome).
+## Installation
+To run this project, you need to have Python and the required libraries installed. Follow the steps below to set up the project:
 
-The data.json file is used as test database for the registered users.
+1. Clone the repository:
+    ```bash
+    git clone https://github.com/yourusername/login_with_webcam_capture.git
+    cd login_with_webcam_capture
+    ```
+
+2. Install the required libraries:
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+## Usage
+The `hackathon.pyw` file is the main script to execute the application. Run the script using the following command:
+```bash
+python hackathon.pyw
+```
+
+## Performance
+The camera component may have a slight delay during the initial loading time due to the initialization of the OpenCV classes and webcam access. Optimizations are welcome to improve performance.
+
+## Data
+The `data.json` file is used as a test database for the registered users.
+
+## Contributing
+Contributions are welcome! Please fork the repository and create a pull request with your changes.
+
+## License
+This project is licensed under the MIT License. See [MIT License](https://opensource.org/license/mit) for more details.
