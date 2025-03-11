@@ -1,6 +1,10 @@
 {
-	"123456": {
-		"nombre": "Pacho",
-		"carrera": "Matem\u00e1ticas"
-	}
+    "123456": {
+        "nombre": "Pacho",
+        "carrera": "Matem\u00e1ticas"
+    },
+    "123": {
+        "nombre": "Oli",
+        "carrera": "Derecho"
+    }
 }

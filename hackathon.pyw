@@ -6,13 +6,14 @@ import json
 from tkinter import *
 from tkinter import ttk
 from tkinter import messagebox
+from datetime import datetime
 import constants
 
 class WebcamApp:
 	def __init__(self, root):
 		self.root = root
 		self.video_capture = None
-		# self.stop_webcam = False
+		self.activate_webcam = False
 		self.users = self.load_users_data()
 		self.setup_ui()
 	
@@ -30,23 +31,26 @@ class WebcamApp:
 
 	def init_webcam(self):
 		try:
-			self.foreground = cv2.imread('oval1.png')
+			self.foreground = cv2.imread('oval.png')
 		except Exception as exception:
 			self.log_message(exception)
 		
 		self.video_capture = cv2.VideoCapture(0)
 		self.video_capture.set(cv2.CAP_PROP_FRAME_WIDTH, 400)
 		self.video_capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 400)
+	
+	def release_webcam(self):
+		self.activate_webcam = False
+		# if self.video_capture is not None:
+		# 	self.video_capture.release()
+		# 	self.video_capture = None
 
 	def show_webcam_frame(self):
+		if not self.activate_webcam:
+			return
+		
 		if self.video_capture is None:
 			self.init_webcam()
-
-		# if self.stop_webcam:
-		# 	if self.video_capture is not None:
-		# 		self.video_capture.release()
-		# 		self.video_capture = None
-		# 	return
 
 		if self.video_capture is None or not self.video_capture.isOpened():
 			messagebox.showerror("Error", "No se pudo inicializar la cámara. Verifique la conexión.")
@@ -66,7 +70,7 @@ class WebcamApp:
 		imgtk = ImageTk.PhotoImage(image=img)
 		self.lmain.imgtk = imgtk
 		self.lmain.configure(image=imgtk)
-		self.lmain.after(10, self.show_webcam_frame)
+		self.lmain.after(50, self.show_webcam_frame)
 
 	def login_command(self):
 		if self.career_combobox.get() == '- Seleccione -':
@@ -79,13 +83,16 @@ class WebcamApp:
 			self.login_button.pack_forget()
 			self.registration_button.pack_forget()
 			self.form_container.pack_forget()
-			
-			time.sleep(0.5)
-			self.info_label.config(text='Manten tu rostro en\nel área delimitada')
-			self.cuadro2.pack(padx=10, pady=10)
-			self.lmain.pack()
-			self.snapshot_button.pack(padx=10, pady=0)
-			self.show_webcam_frame()
+			self.info_label.config(text='Cargando...')
+			self.root.after(500, self.display_camera)
+
+	def display_camera(self):
+		self.activate_webcam = True
+		self.cuadro2.pack(padx=10, pady=10)
+		self.lmain.pack()
+		self.snapshot_button.pack(padx=10, pady=0)
+		self.info_label.config(text='Manten tu rostro en\nel área delimitada')
+		self.show_webcam_frame()
 
 	def registration_command(self):
 		self.info_label.config(text='Completa el registro con\nlos siguientes datos')
@@ -105,20 +112,50 @@ class WebcamApp:
 			messagebox.showinfo('Error de registro', '¡Debe poner su nombre!')
 		else:
 			self.users[self.id_number_input.get()] = {'nombre': self.full_name_input.get(), 'carrera': self.career_combobox.get()}
-			with open('data.json', 'w') as outfile:
+			with open('users_data.json', 'w') as outfile:
 				json.dump(self.users, outfile, indent=4)
+			messagebox.showinfo('Registro exitoso', '¡Usuario registrado exitosamente!')
+			self.users = self.load_users_data()
+
+			# self.career_combobox.current(0)
+			# self.full_name_input.delete(0, END)
+			# self.id_number_input.delete(0, END)
 			self.info_label.config(text='Ingresa con tus datos')
 			self.full_name_label.grid_forget()
 			self.full_name_input.grid_forget()
 			self.validate_button.pack_forget()
+			self.return_button.pack_forget()
 			self.login_button.pack(padx=10, pady=0)
 			self.registration_button.pack(padx=10, pady=0)
 
 	def snapshot_command(self):
+		self.save_camera_picture()
 		self.info_label.config(text="¡Gracias!\nSi deseas ingresar con otra cuenta\ndale al botón 'Regresar'.")
+		self.career_combobox.current(0)
+		self.full_name_input.delete(0, END)
+		self.id_number_input.delete(0, END)
 		self.cuadro2.pack_forget()
 		self.snapshot_button.pack_forget()
 		self.return_button.pack(padx=10, pady=0)
+	
+	def save_camera_picture(self):
+		if self.video_capture is None or not self.video_capture.isOpened():
+			self.log_message("No se pudo guardar la imagen. La cámara no está activa.")
+			return
+		
+		_, frame = self.video_capture.read()
+		frame = cv2.flip(frame, 1)
+
+		# Get just the center of the image with size of 400x400
+		height, width = frame.shape[:2]
+		start_row, end_row = int(height * 0.5) - 200, int(height * 0.5) + 200
+		start_col, end_col = int(width * 0.5) - 200, int(width * 0.5) + 200
+
+		frame = frame[max(0, start_row):min(end_row, height),
+						max(0, start_col):min(end_col, width)]
+
+		cv2.imwrite(f"captures\\{self.id_number_input.get()}_{datetime.now().strftime("%d%m%Y_%H%M%S")}.png", frame)
+		self.release_webcam()
 
 	def return_command(self):
 		self.lmain.pack_forget()
@@ -127,11 +164,11 @@ class WebcamApp:
 		self.validate_button.pack_forget()
 		self.full_name_label.grid_forget()
 		self.full_name_input.grid_forget()
-		self.form_container.pack()
+		self.form_container.pack(padx=10, pady=10)
 		self.info_label.config(text='Ingresa con tus datos')
 		self.login_button.pack(padx=10, pady=0)
 		self.registration_button.pack(padx=10, pady=10)
-		# self.stop_webcam = True
+		# self.release_webcam()
 
 	def setup_ui(self):
 		self.root.title('Asistencia')

@@ -29,9 +29,3 @@ The camera component may have a slight delay during the initial loading time due
 
 ## Data
 The `data.json` file is used as a test database for the registered users.
-
-## Contributing
-Contributions are welcome! Please fork the repository and create a pull request with your changes.
-
-## License
-This project is licensed under the MIT License. See [MIT License](https://opensource.org/license/mit) for more details.
